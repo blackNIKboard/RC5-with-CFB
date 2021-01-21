@@ -16,15 +16,6 @@ public class CypherTools {
         return block;
     }
 
-    public static Block xorBlock(Block raw, Block processed) {
-        Block result = new Block();
-
-        result.A = processed.A ^ raw.A;
-        result.B = processed.B ^ raw.B;
-
-        return result;
-    }
-
     public static byte[] concatenateParts(Block block) {
         byte[] A = longToBytes(block.A);
         byte[] B = longToBytes(block.B);
