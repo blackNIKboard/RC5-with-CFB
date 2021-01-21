@@ -7,46 +7,29 @@ import static rc5.CypherTools.*;
 
 public class CFB {
     private RC5 cypher;
-    private int rounds;
-    private ArrayList<Block> blocks;
     private ArrayList<byte[]> bytes;
+    private byte pad = 0x01;
 
-    public CFB(byte[] key, int cypherRounds, int CFBRounds) {
+    public CFB(byte[] key, int cypherRounds) {
         cypher = new RC5(key, cypherRounds);
-        rounds = CFBRounds;
-    }
-
-    public ArrayList<byte[]> encrypt(byte[] rawData) {
-        bytes = new ArrayList<>();
-
-        Block previous = null; //todo generate IV
-        Block open;
-        Block encrypted;
-
-        for (int i = 0; i < rounds; i++) {
-            open = initBlock(Arrays.copyOfRange(rawData, i * 16, i * 16 + 16));
-
-            if (i == 0) {
-                previous = xorBlock(open, cypher.encryptBlock(open));
-            }
-
-            encrypted = xorBlock(previous, cypher.encryptBlock(open));
-            previous = encrypted;
-
-            bytes.add(concatenateParts(encrypted));
-        }
-
-        return bytes;
     }
 
     public byte[] encipherCFB(byte[] text) {
+        int paddingSize = (16 - (text.length % 16)) % 16;
+        if (paddingSize != 0) {
+            text = Arrays.copyOf(text, text.length + paddingSize);
+            for (int i = text.length - 1; i >= text.length - paddingSize; i--) {
+                text[i] = pad;
+            }
+        }
+
         int blockNumber = text.length - 1;
-        byte[] res = new byte[blockNumber+1];
+        byte[] res = new byte[blockNumber + 1];
 
         Block init = new Block();
         init.A = 55;
         init.B = 55;
-        Block initVector = cypher.encryptBlock(init);
+        Block initVector = cypher.encryptBlock(init); // TODO InitVector randomize
 
         for (int i = 0; i < blockNumber; ++i) {
             if (i > 0) {
@@ -64,15 +47,16 @@ public class CFB {
     }
 
     public byte[] decipherCFB(byte[] text) {
+        int paddingSize = 0;
         int blockNumber = text.length - 1;
-        byte[] res = new byte[blockNumber+1];
+        byte[] res = new byte[blockNumber + 1];
 
         Block init = new Block();
         init.A = 55;
         init.B = 55;
         Block initVector = cypher.encryptBlock(init);
 
-        for(int i = 0; i < blockNumber; ++i) {
+        for (int i = 0; i < blockNumber; ++i) {
             if (i > 0) {
                 initVector = cypher.encryptBlock(initVector);
             }
@@ -86,31 +70,13 @@ public class CFB {
 
             i = setBlocksAndGetIndex(res, i, temp);
         }
-//        res[res.length - 1] = blockDiff;
-        return res;
-    }
 
-    public ArrayList<byte[]> decrypt(ArrayList<byte[]> encryptedData) {
-        bytes = new ArrayList<>();
-
-        Block previous = null; //todo generate IV
-        Block open;
-        Block encrypted;
-
-        for (int i = 0; i < rounds; i++) {
-            open = initBlock(encryptedData.get(i));
-
-            if (i == 0) {
-                previous = xorBlock(open, cypher.decryptBlock(open));
-            }
-
-            encrypted = xorBlock(previous, cypher.decryptBlock(open));
-            previous = encrypted;
-
-            bytes.add(concatenateParts(encrypted));
+        while (res[res.length - paddingSize - 1] == pad) {
+            paddingSize++;
         }
+        res = Arrays.copyOf(res, res.length - paddingSize);
 
-        return bytes;
+        return res;
     }
 
     private static int setBlocksAndGetIndex(byte[] res, int pos, Block temp) {
