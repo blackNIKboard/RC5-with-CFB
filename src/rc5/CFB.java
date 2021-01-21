@@ -1,10 +1,10 @@
 package rc5;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static rc5.CypherTools.*;
+import static rc5.CypherTools.concatenateParts;
+import static rc5.CypherTools.initBlock;
 
 public class CFB {
     private RC5 cypher;
@@ -29,10 +29,7 @@ public class CFB {
         int blockNumber = text.length - 1;
         byte[] res = new byte[blockNumber + 1];
 
-//        Block init = new Block();
-//        init.A = 55;
-//        init.B = 55;
-        Block initVector = cypher.encryptBlock(initBlock(initializationVector)); // TODO InitVector randomize
+        Block initVector = cypher.encryptBlock(initBlock(initializationVector));
 
         for (int i = 0; i < blockNumber; ++i) {
             if (i > 0) {
@@ -45,7 +42,7 @@ public class CFB {
 
             i = setBlocksAndGetIndex(res, i, initVector);
         }
-//        res[res.length - 1] = blockDiff;
+
         return res;
     }
 
@@ -54,9 +51,6 @@ public class CFB {
         int blockNumber = text.length - 1;
         byte[] res = new byte[blockNumber + 1];
 
-//        Block init = new Block();
-//        init.A = 55;
-//        init.B = 55;
         Block initVector = cypher.encryptBlock(initBlock(initializationVector));
 
         for (int i = 0; i < blockNumber; ++i) {

@@ -1,8 +1,5 @@
 package rc5;
 
-import java.util.Arrays;
-import java.nio.ByteBuffer;
-
 import static rc5.CypherTools.*;
 
 public class RC5 {
