@@ -10,20 +10,21 @@ import java.util.Random;
 public class Main {
     private static final boolean debug = true;
 
-    public static void main(String[] args) throws FileNotFoundException {
-        // write your code here
+    public static void main(String[] args) {
         testImage();
         testTxt();
-//        testCFB(20);
+        testCFB(20);
     }
 
-    private static void testImage() throws FileNotFoundException {
+    private static void testImage() {
         String key = generateString(2, 255);
+        String initVector = generateString(16);
+
         String rawImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\Tux.bmp";
         String encImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encTux.bmp";
         String decImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decTux.bmp";
-        encryptFile(key, rawImage, encImage, debug);
-        decryptFile(key, encImage, decImage, debug);
+        encryptFile(key, initVector, rawImage, encImage, debug);
+        decryptFile(key, initVector, encImage, decImage, debug);
 
         if (Arrays.equals(readTxtBytes(rawImage), readTxtBytes(decImage))) {
             System.out.println("PASSED\n");
@@ -31,13 +32,14 @@ public class Main {
 
     }
 
-    private static void testTxt() throws FileNotFoundException {
+    private static void testTxt() {
         String key = generateString(2, 255);
+        String initVector = generateString(16);
         String rawTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\number.txt";
         String encTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encNumber.txt";
         String decTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decNumber.txt";
-        encryptFile(key, rawTxt, encTxt, debug);
-        decryptFile(key, encTxt, decTxt, debug);
+        encryptFile(key, initVector, rawTxt, encTxt, debug);
+        decryptFile(key, initVector, encTxt, decTxt, debug);
 
         if (Arrays.equals(readTxtBytes(rawTxt), readTxtBytes(decTxt))) {
             System.out.println("PASSED\n");
@@ -45,13 +47,17 @@ public class Main {
 
     }
 
-    private static void encryptFile(String key, String inputFilename, String outputFilename, boolean debug) {
+    private static void encryptFile(String key, String initVector, String inputFilename, String outputFilename, boolean debug) {
         byte[] rawBytes = readTxtBytes(inputFilename);
         if (key == null) {
             System.out.println("Generating key");
             key = generateString(2, 255);
         }
-        CFB encrypter = new CFB(key.getBytes(), 12);
+        if (initVector == null || initVector.getBytes().length != 16) {
+            throw new RuntimeException("Invalid initialization vector");
+        }
+
+        CFB encrypter = new CFB(key.getBytes(), initVector);
 
 
         if (inputFilename.contains(".txt")) {
@@ -86,9 +92,15 @@ public class Main {
 
     }
 
-    private static void decryptFile(String key, String inputFilename, String outputFilename, boolean debug) throws FileNotFoundException {
+    private static void decryptFile(String key, String initVector, String inputFilename, String outputFilename, boolean debug) {
         byte[] rawBytes = readTxtBytes(inputFilename);
-        CFB encrypter = new CFB(key.getBytes(), 12);
+        CFB encrypter = new CFB(key.getBytes(), initVector);
+        if (key == null) {
+            throw new RuntimeException("Key missing");
+        }
+        if (initVector == null || initVector.getBytes().length != 16) {
+            throw new RuntimeException("Invalid initialization vector");
+        }
 
         if (inputFilename.contains(".txt")) {
             System.out.println("Decrypting txt file");
@@ -159,6 +171,8 @@ public class Main {
     }
 
     private static void testCFB(int rounds) {
+        System.out.println("Testing random strings enc/dec");
+        String initVector = generateString(16);
         String key = generateString(2, 255);
         System.out.println("Key is: " + key);
 
@@ -170,14 +184,18 @@ public class Main {
             cases.add(generateString(minLength, maxLength));
         }
 
-        CFB test = new CFB(key.getBytes(), 12);
+        CFB test = new CFB(key.getBytes(), initVector);
 
         for (String arg : cases) {
-            System.out.print(arg);
+            if (debug) {
+                System.out.print(arg);
+            }
             if (!Arrays.equals(test.decipherCFB(test.encipherCFB(arg.getBytes())), arg.getBytes())) {
                 throw new RuntimeException("Mismatching for: " + arg);
             }
-            System.out.println("  |  PASSED");
+            if (debug) {
+                System.out.println("  |  PASSED");
+            }
         }
     }
 
@@ -196,10 +214,9 @@ public class Main {
         return buffer.toString();
     }
 
-    private static String generateString(int length) {
+    private static String generateString(int targetStringLength) {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
-        int targetStringLength = new Random().nextInt(length);
         Random random = new Random();
         StringBuilder buffer = new StringBuilder(targetStringLength);
         for (int j = 0; j < targetStringLength; j++) {
@@ -212,11 +229,12 @@ public class Main {
     }
 
     private static void manualTestCFB() {
+        String initVector = generateString(16);
         String key1 = "sdjashfdkjagtejhwabkjgshag";
         var test32 = "tX5JrH7O".getBytes();
         var test128 = "tX5JrH7OiDXEpsrmtX5JrH7OiDXEpsrmtX5JrH7OiDXEpsrmtX5JrH7OiDXEpsrm".getBytes();
         RC5 test = new RC5(key1.getBytes(), 12);
-        CFB test1 = new CFB(key1.getBytes(), 12);
+        CFB test1 = new CFB(key1.getBytes(), initVector);
 //        byte[] encBlock = test.encryptBlock(test64);
         byte[] encBlock = test1.encipherCFB(test32);
 //        byte[] decBlock = test.decryptBlock(encBlock);

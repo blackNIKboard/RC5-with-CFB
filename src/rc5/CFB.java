@@ -1,5 +1,6 @@
 package rc5;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,9 +10,11 @@ public class CFB {
     private RC5 cypher;
     private ArrayList<byte[]> bytes;
     private byte pad = 0x01;
+    private byte[] initializationVector;
 
-    public CFB(byte[] key, int cypherRounds) {
-        cypher = new RC5(key, cypherRounds);
+    public CFB(byte[] key, String initializationVector) {
+        cypher = new RC5(key, 12);
+        this.initializationVector = initializationVector.getBytes();
     }
 
     public byte[] encipherCFB(byte[] text) {
@@ -26,10 +29,10 @@ public class CFB {
         int blockNumber = text.length - 1;
         byte[] res = new byte[blockNumber + 1];
 
-        Block init = new Block();
-        init.A = 55;
-        init.B = 55;
-        Block initVector = cypher.encryptBlock(init); // TODO InitVector randomize
+//        Block init = new Block();
+//        init.A = 55;
+//        init.B = 55;
+        Block initVector = cypher.encryptBlock(initBlock(initializationVector)); // TODO InitVector randomize
 
         for (int i = 0; i < blockNumber; ++i) {
             if (i > 0) {
@@ -51,10 +54,10 @@ public class CFB {
         int blockNumber = text.length - 1;
         byte[] res = new byte[blockNumber + 1];
 
-        Block init = new Block();
-        init.A = 55;
-        init.B = 55;
-        Block initVector = cypher.encryptBlock(init);
+//        Block init = new Block();
+//        init.A = 55;
+//        init.B = 55;
+        Block initVector = cypher.encryptBlock(initBlock(initializationVector));
 
         for (int i = 0; i < blockNumber; ++i) {
             if (i > 0) {
