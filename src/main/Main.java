@@ -5,10 +5,16 @@ import static main.CypherTester.*;
 
 public class Main {
     public static void main(String[] args) {
-        testImage();
+        testECBImage();
         System.out.println("------------------");
 
-        testTxt();
+        testCFBImage();
+        System.out.println("------------------");
+
+        testECBTxt();
+        System.out.println("------------------");
+
+        testCFBTxt();
         System.out.println("------------------");
 
         testCFB(20);

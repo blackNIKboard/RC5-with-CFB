@@ -1,6 +1,6 @@
 package main;
 
-import rc5.CFB;
+import rc5.SequenceEncrypter;
 
 import java.io.*;
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 import static main.StringGenerator.generateString;
 
 public class FileEncrypter {
-     static void encryptFile(String key, String initVector, String inputFilename, String outputFilename, boolean debug) {
+    static void encryptFile(String key, String initVector, String inputFilename, String outputFilename, boolean debug, String mode) {
         byte[] rawBytes = readTxtBytes(inputFilename);
         if (key == null) {
             System.out.println("Generating key");
@@ -18,23 +18,27 @@ public class FileEncrypter {
             throw new RuntimeException("Invalid initialization vector");
         }
 
-        CFB encrypter = new CFB(key.getBytes(), initVector);
-
+        SequenceEncrypter encrypter = new SequenceEncrypter(key.getBytes(), initVector);
 
         if (inputFilename.contains(".txt")) {
-            System.out.println("Encrypting txt file");
+            System.out.println(mode+" Encrypting txt file");
             if (debug) {
                 System.out.println("Key: " + key);
                 System.out.println("Content: " + new String(rawBytes) + "\n");
             }
 
-            byte[] encrypted = encrypter.encipherCFB(rawBytes);
+            byte[] encrypted = new byte[0];
+            if (mode.equals("CFB"))
+                encrypted = encrypter.encipherCFB(rawBytes);
+            if (mode.equals("ECB"))
+                encrypted = encrypter.encipherECB(rawBytes);
+
             writeTxtBytes(encrypted, outputFilename);
 
             return;
         }
         if (inputFilename.contains(".bmp")) {
-            System.out.println("Encrypting bmp file");
+            System.out.println(mode+" Encrypting bmp file");
             if (debug) {
                 System.out.println("Key: " + key + "\n");
 //                System.out.println("Content: " + new String(rawBytes) + "\n");
@@ -42,7 +46,11 @@ public class FileEncrypter {
 
             byte[] header = Arrays.copyOfRange(rawBytes, 0, 81);
             byte[] img = Arrays.copyOfRange(rawBytes, 81, rawBytes.length);
-            byte[] encrypted = encrypter.encipherCFB(img);
+            byte[] encrypted = new byte[0];
+            if (mode.equals("CFB"))
+                encrypted = encrypter.encipherCFB(img);
+            if (mode.equals("ECB"))
+                encrypted = encrypter.encipherECB(img);
             byte[] result = new byte[header.length + encrypted.length];
 
             System.arraycopy(header, 0, result, 0, header.length);
@@ -53,9 +61,9 @@ public class FileEncrypter {
 
     }
 
-     static void decryptFile(String key, String initVector, String inputFilename, String outputFilename, boolean debug) {
+    static void decryptFile(String key, String initVector, String inputFilename, String outputFilename, boolean debug, String mode) {
         byte[] rawBytes = readTxtBytes(inputFilename);
-        CFB encrypter = new CFB(key.getBytes(), initVector);
+        SequenceEncrypter encrypter = new SequenceEncrypter(key.getBytes(), initVector);
         if (key == null) {
             throw new RuntimeException("Key missing");
         }
@@ -64,18 +72,24 @@ public class FileEncrypter {
         }
 
         if (inputFilename.contains(".txt")) {
-            System.out.println("Decrypting txt file");
+            System.out.println(mode+" Decrypting txt file");
             if (debug) {
                 System.out.println("Key: " + key);
                 System.out.println("Content: " + new String(rawBytes));
             }
-            byte[] decrypted = encrypter.decipherCFB(rawBytes);
+
+            byte[] decrypted = new byte[0];
+            if (mode.equals("CFB"))
+                decrypted = encrypter.decipherCFB(rawBytes);
+            if (mode.equals("ECB"))
+                decrypted = encrypter.decipherECB(rawBytes);
+
             writeTxtBytes(decrypted, outputFilename);
 
             return;
         }
         if (inputFilename.contains(".bmp")) {
-            System.out.println("Decrypting bmp file");
+            System.out.println(mode+" Decrypting bmp file");
             if (debug) {
                 System.out.println("Key: " + key);
 //                System.out.println("Content: " + new String(rawBytes));
@@ -85,7 +99,11 @@ public class FileEncrypter {
             byte[] img = Arrays.copyOfRange(rawBytes, 81, rawBytes.length);
 
 //            Arrays.fill(img, (byte) 0xf); // test filling
-            byte[] decrypted = encrypter.decipherCFB(img);
+            byte[] decrypted = new byte[0];
+            if (mode.equals("CFB"))
+                decrypted = encrypter.decipherCFB(img);
+            if (mode.equals("ECB"))
+                decrypted = encrypter.decipherECB(img);
             byte[] result = new byte[header.length + decrypted.length];
 
             System.arraycopy(header, 0, result, 0, header.length);
@@ -95,7 +113,7 @@ public class FileEncrypter {
         }
     }
 
-     static byte[] readTxtBytes(String filename) {
+    static byte[] readTxtBytes(String filename) {
         File file = new File(filename);
         byte[] fileContent = null;
         FileInputStream fin = null;
@@ -123,7 +141,7 @@ public class FileEncrypter {
         return fileContent;
     }
 
-     static void writeTxtBytes(byte[] bytes, String filename) {
+    static void writeTxtBytes(byte[] bytes, String filename) {
         try (FileOutputStream fos = new FileOutputStream(filename)) {
             fos.write(bytes);
         } catch (IOException e) {

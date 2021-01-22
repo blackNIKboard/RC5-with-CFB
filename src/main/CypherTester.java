@@ -1,6 +1,6 @@
 package main;
 
-import rc5.CFB;
+import rc5.SequenceEncrypter;
 import rc5.RC5;
 
 import java.util.ArrayList;
@@ -12,36 +12,64 @@ import static main.StringGenerator.generateString;
 public class CypherTester {
     private static final boolean debug = true;
 
-    static void testImage() {
+    static void testECBImage() {
         String key = generateString(2, 255);
         String initVector = generateString(16);
 
         String rawImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\Tux.bmp";
-        String encImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encTux.bmp";
-        String decImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decTux.bmp";
-        encryptFile(key, initVector, rawImage, encImage, debug);
-        decryptFile(key, initVector, encImage, decImage, debug);
+        String encImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encECBTux.bmp";
+        String decImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decECBTux.bmp";
+        encryptFile(key, initVector, rawImage, encImage, debug, "ECB");
+        decryptFile(key, initVector, encImage, decImage, debug, "ECB");
 
         if (Arrays.equals(readTxtBytes(rawImage), readTxtBytes(decImage))) {
             System.out.println("PASSED\n");
         }
-
     }
 
-    static void testTxt() {
+    static void testCFBImage() {
+        String key = generateString(2, 255);
+        String initVector = generateString(16);
+
+        String rawImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\Tux.bmp";
+        String encImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encCFBTux.bmp";
+        String decImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decCFBTux.bmp";
+        encryptFile(key, initVector, rawImage, encImage, debug, "CFB");
+        decryptFile(key, initVector, encImage, decImage, debug, "CFB");
+
+        if (Arrays.equals(readTxtBytes(rawImage), readTxtBytes(decImage))) {
+            System.out.println("PASSED\n");
+        }
+    }
+
+    static void testECBTxt() {
         String key = generateString(2, 255);
         String initVector = generateString(16);
         String rawTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\number.txt";
-        String encTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encNumber.txt";
-        String decTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decNumber.txt";
-        encryptFile(key, initVector, rawTxt, encTxt, debug);
-        decryptFile(key, initVector, encTxt, decTxt, debug);
+        String encTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encECBNumber.txt";
+        String decTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decECBNumber.txt";
+        encryptFile(key, initVector, rawTxt, encTxt, debug, "ECB");
+        decryptFile(key, initVector, encTxt, decTxt, debug, "ECB");
 
         if (Arrays.equals(readTxtBytes(rawTxt), readTxtBytes(decTxt))) {
             System.out.println("PASSED\n");
         }
-
     }
+
+    static void testCFBTxt() {
+        String key = generateString(2, 255);
+        String initVector = generateString(16);
+        String rawTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\number.txt";
+        String encTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encCFBNumber.txt";
+        String decTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decCFBNumber.txt";
+        encryptFile(key, initVector, rawTxt, encTxt, debug, "CFB");
+        decryptFile(key, initVector, encTxt, decTxt, debug, "CFB");
+
+        if (Arrays.equals(readTxtBytes(rawTxt), readTxtBytes(decTxt))) {
+            System.out.println("PASSED\n");
+        }
+    }
+
 
     static void testCFB(int rounds) {
         System.out.println("Testing random strings enc/dec");
@@ -57,7 +85,7 @@ public class CypherTester {
             cases.add(generateString(minLength, maxLength));
         }
 
-        CFB test = new CFB(key.getBytes(), initVector);
+        SequenceEncrypter test = new SequenceEncrypter(key.getBytes(), initVector);
 
         for (String arg : cases) {
             if (debug) {
@@ -78,7 +106,7 @@ public class CypherTester {
         var test32 = "tX5JrH7O".getBytes();
         var test128 = "tX5JrH7OiDXEpsrmtX5JrH7OiDXEpsrmtX5JrH7OiDXEpsrmtX5JrH7OiDXEpsrm".getBytes();
         RC5 test = new RC5(key1.getBytes(), 12);
-        CFB test1 = new CFB(key1.getBytes(), initVector);
+        SequenceEncrypter test1 = new SequenceEncrypter(key1.getBytes(), initVector);
 //        byte[] encBlock = test.encryptBlock(test64);
         byte[] encBlock = test1.encipherCFB(test32);
 //        byte[] decBlock = test.decryptBlock(encBlock);

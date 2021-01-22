@@ -1,6 +1,6 @@
 package main;
 
-import rc5.CFB;
+import rc5.SequenceEncrypter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ public class Analysis {
         String key = generateString(2, 255);
         System.out.println("Key is: " + key);
 
-        CFB test = new CFB(key.getBytes(), initVector);
+        SequenceEncrypter test = new SequenceEncrypter(key.getBytes(), initVector);
 
         ArrayList<String> cases = new ArrayList<>(); // generate raw strings for cases
         int minLength = 77;
