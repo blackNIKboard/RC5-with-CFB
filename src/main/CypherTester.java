@@ -6,6 +6,7 @@ import rc5.RC5;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static main.Analyzer.padBytes;
 import static main.FileEncrypter.*;
 import static main.StringGenerator.generateString;
 
@@ -69,7 +70,6 @@ public class CypherTester {
             System.out.println("PASSED\n");
         }
     }
-
 
     static void testCFB(int rounds) {
         System.out.println("Testing random strings enc/dec");

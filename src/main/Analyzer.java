@@ -9,7 +9,25 @@ import java.util.StringJoiner;
 
 import static main.StringGenerator.generateString;
 
-public class Analysis {
+public class Analyzer {
+    static void testCorrelation() {
+        String initVector = generateString(16);
+        String key = generateString(2, 255);
+        SequenceEncrypter test = new SequenceEncrypter(key.getBytes(), initVector);
+
+        byte[] decrypted = generateString(40, 100).getBytes();
+        decrypted = padBytes(decrypted);
+        byte[] encrypted = test.encipherCFB(decrypted);
+
+        CorrelationAnalyzer correlationAnalyzer = new CorrelationAnalyzer(decrypted, encrypted);
+        correlationAnalyzer.countOnesAndZeros();
+        correlationAnalyzer.countCorrelation();
+
+        System.out.println("Number of ones: " + correlationAnalyzer.getOnes());
+        System.out.println("Number of zeros: " + correlationAnalyzer.getZeros());
+        System.out.println("Correlation: " + correlationAnalyzer.getCorrelation());
+    }
+
     static void errorDistribution(int rounds) {
         System.out.println("Testing error distribution enc/dec");
         String initVector = generateString(16);
@@ -67,7 +85,7 @@ public class Analysis {
         return joiner.toString();
     }
 
-    private static byte[] padBytes(byte[] raw) {
+    static byte[] padBytes(byte[] raw) {
         int paddingSize = (16 - (raw.length % 16)) % 16;
         if (paddingSize != 0) {
             raw = Arrays.copyOf(raw, raw.length + paddingSize);
