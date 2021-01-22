@@ -17,7 +17,7 @@ public class Main {
 //        testCFBTxt();
 //        System.out.println("------------------");
 //
-//        testCFB(20);
+//        testCFB(5);
 //        System.out.println("------------------");
 
         testCorrelation();

@@ -11,16 +11,19 @@ import static main.StringGenerator.generateString;
 
 public class Analyzer {
     static void testCorrelation() {
+        System.out.println("Calculating correlation and bits");
         String initVector = generateString(16);
         String key = generateString(2, 255);
         SequenceEncrypter test = new SequenceEncrypter(key.getBytes(), initVector);
 
-        byte[] decrypted = generateString(40, 100).getBytes();
+//        byte[] decrypted = generateString(40, 100).getBytes();
+        byte[] decrypted = generateString(16).getBytes();
         decrypted = padBytes(decrypted);
         byte[] encrypted = test.encipherCFB(decrypted);
 
         CorrelationAnalyzer correlationAnalyzer = new CorrelationAnalyzer(decrypted, encrypted);
-        correlationAnalyzer.countOnesAndZeros();
+        correlationAnalyzer.countOnes();
+        correlationAnalyzer.countZeros();
         correlationAnalyzer.countCorrelation();
 
         System.out.println("Number of ones: " + correlationAnalyzer.getOnes());

@@ -30,24 +30,44 @@ public class CorrelationAnalyzer {
         return correlation;
     }
 
-    public void countOnesAndZeros() {
+    public void countOnes() {
+        int result = 0;
         int sourceByte;
-        int counterZeros = 0;
-        int counterOnes = 0;
+        int counter;
 
         for (byte encryptedDatum : encryptedData) {
             sourceByte = encryptedDatum & 0xFF;
-            counterOnes = 0;
-            for (; sourceByte != 0; sourceByte = (sourceByte >>> 1)) {
+            counter = 0;
+
+            for (int i = 0; i < 8; i++) {
+                sourceByte = (sourceByte >>> 1);
                 if ((sourceByte & 1) == 1) {
-                    counterOnes++;
-                } else {
-                    counterZeros++;
+                    counter++;
                 }
             }
-            ones += counterOnes;
-            zeros += counterZeros;
+            result += counter;
         }
+        ones = result;
+    }
+
+    public void countZeros(){
+        int result = 0;
+        int sourceByte;
+        int counter;
+
+        for (byte encryptedDatum : encryptedData) {
+            sourceByte = encryptedDatum & 0xFF;
+            counter = 0;
+
+            for (int i = 0; i < 8; i++) {
+                sourceByte = (sourceByte >>> 1);
+                if ((sourceByte & 1) == 0) {
+                    counter++;
+                }
+            }
+            result += counter;
+        }
+        zeros = result;
     }
 
     public double getCorrelation() {
