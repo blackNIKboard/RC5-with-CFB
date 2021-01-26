@@ -6,6 +6,22 @@ import java.util.Arrays;
 import static java.lang.Math.pow;
 
 public class CorrelationAnalyzer {
+    public static int[] countChanges(byte[] src, byte[] dst) {
+        int[] changes = new int[16 * 8];
+        Arrays.fill(changes, 0);
+
+        String bitsSrc = toBitString(src);
+        String bitsDst = toBitString(dst);
+
+        for (int i = 0; i < 16 * 8; i++) {
+            if (bitsSrc.charAt(i) == bitsDst.charAt(i)) {
+                changes[i]++;
+            }
+        }
+
+        return changes;
+    }
+
     public static AbstractMap.SimpleEntry<Double, Boolean> performSeriesTest(byte[] src) {
         int L = 2;
         int n0 = 0; // 101

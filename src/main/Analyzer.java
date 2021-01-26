@@ -1,12 +1,16 @@
 package main;
 
+import rc5.Block;
 import rc5.RC5;
 import rc5.SequenceEncrypter;
 
+import java.awt.image.AreaAveragingScaleFilter;
 import java.io.Serializable;
 import java.util.*;
 
+import static main.CorrelationAnalyzer.countChanges;
 import static main.StringGenerator.generateString;
+import static rc5.CypherTools.initBlock;
 
 public class Analyzer {
     static void performTests() {
@@ -16,9 +20,39 @@ public class Analyzer {
         byte[] key = "bneqozjogjiibtiejghrhqisepqfpzzlrrthskieofbkeweymqjdprjgozfeqbki".getBytes();
 //        byte[] data = FileEncrypter.readTxtBytes("dataset\\testData.txt");
 //        System.out.println(new String(data));
-        testAutoCorrelation(new byte[]{0x0, 0x0, 0x0, 0x0, 0x0}, data, "zeros.txt");
-        testAutoCorrelation(new byte[]{(byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF}, data, "ones.txt");
+        byte[] zerosKey = new byte[]{0x0, 0x0, 0x0, 0x0, 0x0};
+        testAutoCorrelation(zerosKey, data, "zeros.txt");
+        testChangesInBlocks(zerosKey, data, "changesZeros.txt");
+
+        byte[] onesKey = new byte[]{(byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF};
+        testAutoCorrelation(onesKey, data, "ones.txt");
+        testChangesInBlocks(onesKey, data, "changesOnes.txt");
+
         testAutoCorrelation(key, data, "random.txt");
+        testChangesInBlocks(key, data, "changesRandom.txt");
+    }
+
+    static void testChangesInBlocks(byte[] key, byte[] data, String filename) {
+        data = padBytes(data);
+        int blocks = data.length / 16;
+        int[][] changes = new int[blocks][16 * 8];
+        RC5 test = new RC5(key, 12);
+
+        for (int i = 0; i < blocks; i++) {
+            byte[] currentDec = Arrays.copyOfRange(data, i * 16, i * 16 + 16);
+            AbstractMap.SimpleEntry<int[], byte[]> currentEnc = test.encryptBlockWithStats(currentDec);
+
+            changes[i] = currentEnc.getKey();
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < blocks; i++) {
+            for (int j = 0; j < 16 * 8; j++) {
+                result.append(i * 16 + j).append(" ").append(changes[i][j]).append("\n");
+            }
+        }
+
+        FileEncrypter.writeTxtBytes(result.toString().getBytes(), filename);
     }
 
     static void testAutoCorrelation(byte[] key, byte[] data, String filename) {

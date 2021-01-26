@@ -1,5 +1,10 @@
 package rc5;
 
+import main.CorrelationAnalyzer;
+
+import java.util.AbstractMap;
+import java.util.Arrays;
+
 import static rc5.CypherTools.*;
 
 public class RC5 {
@@ -54,6 +59,32 @@ public class RC5 {
         }
 
         return block;
+    }
+
+    public AbstractMap.SimpleEntry<int[], byte[]> encryptBlockWithStats(byte[] rawBlock) {
+        if (rawBlock.length != (2 * w / 8)) {
+            throw new RuntimeException("Invalid block size");
+        }
+
+        Block block = initBlock(rawBlock);
+        int[] changes = new int[16 * 8];
+        Arrays.fill(changes, 0);
+
+        byte[] src = concatenateParts(block);
+
+        block.A = ((block.A + S[0]) % (long) (Math.pow(2, w)));
+        block.B = ((block.B + S[1]) % (long) (Math.pow(2, w)));
+        for (int i = 1; i <= r; i++) {
+            block.A = (rotateLeft(block.A ^ block.B, block.B)) + S[2 * i];
+            block.B = (rotateLeft(block.B ^ block.A, block.A)) + S[2 * i + 1];
+
+            int[] iterationChanges = CorrelationAnalyzer.countChanges(src, concatenateParts(block));
+            for (int j = 0; j < iterationChanges.length; j++) {
+                changes[j] += iterationChanges[i];
+            }
+        }
+
+        return new AbstractMap.SimpleEntry<>(changes, concatenateParts(block));
     }
 
     public byte[] decryptBlock(byte[] encBlock) {
