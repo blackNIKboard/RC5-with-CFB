@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import static java.lang.Math.pow;
 
-public class CorrelationAnalyzer {
+public class AnalysisTools {
     public static int[] countChanges(byte[] src, byte[] dst) {
         int[] changes = new int[16 * 8];
         Arrays.fill(changes, 0);
@@ -101,6 +101,7 @@ public class CorrelationAnalyzer {
         byte[] shifted = Arrays.copyOf(data, data.length);
 
         for (int k = 0; k <= size * 8; k++) {
+            System.out.println(toBitString(shifted));
             corelTest[k] = countCorrelation(shifted, data);
             shifted = rotateRight(shifted);
         }

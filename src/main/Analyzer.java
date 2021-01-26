@@ -1,16 +1,11 @@
 package main;
 
-import rc5.Block;
 import rc5.RC5;
 import rc5.SequenceEncrypter;
 
-import java.awt.image.AreaAveragingScaleFilter;
-import java.io.Serializable;
 import java.util.*;
 
-import static main.CorrelationAnalyzer.countChanges;
 import static main.StringGenerator.generateString;
-import static rc5.CypherTools.initBlock;
 
 public class Analyzer {
     static void performTests() {
@@ -22,20 +17,20 @@ public class Analyzer {
 //        System.out.println(new String(data));
         System.out.print("Performing tests for key: ");
         byte[] zerosKey = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00};
-        System.out.println(CorrelationAnalyzer.toBitString(zerosKey));
+        System.out.println(AnalysisTools.toBitString(zerosKey));
 
         testAutoCorrelation(zerosKey, data, "zeros.txt");
         testChangesInBlocks(zerosKey, data, "changesZeros.txt");
 
         System.out.print("Performing tests for key: ");
         byte[] onesKey = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
-        System.out.println(CorrelationAnalyzer.toBitString(onesKey));
+        System.out.println(AnalysisTools.toBitString(onesKey));
 
         testAutoCorrelation(onesKey, data, "ones.txt");
         testChangesInBlocks(onesKey, data, "changesOnes.txt");
 
         System.out.print("Performing tests for key: ");
-        System.out.println(CorrelationAnalyzer.toBitString(key));
+        System.out.println(AnalysisTools.toBitString(key));
         testAutoCorrelation(key, data, "random.txt");
         testChangesInBlocks(key, data, "changesRandom.txt");
     }
@@ -69,17 +64,17 @@ public class Analyzer {
 
         byte[] encrypted = test1.encipherECB(data);
 
-        double[] autoCorrelation = CorrelationAnalyzer.autoCorrelation(encrypted);
+        double[] autoCorrelation = AnalysisTools.autoCorrelation(encrypted);
 
         StringBuilder autoCorrelationResult = new StringBuilder();
         for (int i = 0; i < autoCorrelation.length; i++) {
             autoCorrelationResult.append(i).append(" ").append(autoCorrelation[i]).append("\n");
         }
 
-        String frequencyResult = CorrelationAnalyzer.countOnes(encrypted) + " " +
-                CorrelationAnalyzer.countZeros(encrypted);
+        String frequencyResult = AnalysisTools.countOnes(encrypted) + " " +
+                AnalysisTools.countZeros(encrypted);
 
-        AbstractMap.SimpleEntry<Double, Boolean> seriesResult = CorrelationAnalyzer.performSeriesTest(encrypted);
+        AbstractMap.SimpleEntry<Double, Boolean> seriesResult = AnalysisTools.performSeriesTest(encrypted);
         if (seriesResult.getValue()) {
             System.out.println("f = " + seriesResult.getKey() + ", series test passed");
         } else {
@@ -100,9 +95,9 @@ public class Analyzer {
         decrypted = padBytes(decrypted);
         byte[] encrypted = test.encipherCFB(decrypted);
 
-        System.out.println("Number of ones: " + CorrelationAnalyzer.countOnes(encrypted));
-        System.out.println("Number of zeros: " + CorrelationAnalyzer.countZeros(encrypted));
-        System.out.println("Correlation: " + CorrelationAnalyzer.countCorrelation(decrypted, encrypted));
+        System.out.println("Number of ones: " + AnalysisTools.countOnes(encrypted));
+        System.out.println("Number of zeros: " + AnalysisTools.countZeros(encrypted));
+        System.out.println("Correlation: " + AnalysisTools.countCorrelation(decrypted, encrypted));
     }
 
     static void errorDistribution(int rounds) {

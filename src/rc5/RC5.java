@@ -1,6 +1,6 @@
 package rc5;
 
-import main.CorrelationAnalyzer;
+import main.AnalysisTools;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -78,7 +78,7 @@ public class RC5 {
             block.A = (rotateLeft(block.A ^ block.B, block.B)) + S[2 * i];
             block.B = (rotateLeft(block.B ^ block.A, block.A)) + S[2 * i + 1];
 
-            int[] iterationChanges = CorrelationAnalyzer.countChanges(src, concatenateParts(block));
+            int[] iterationChanges = AnalysisTools.countChanges(src, concatenateParts(block));
             for (int j = 0; j < iterationChanges.length; j++) {
                 changes[j] += iterationChanges[j];
             }
