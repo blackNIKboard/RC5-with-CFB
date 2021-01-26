@@ -1,9 +1,48 @@
 package main;
 
-import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.Arrays;
 
+import static java.lang.Math.pow;
+
 public class CorrelationAnalyzer {
+    public static AbstractMap.SimpleEntry<Double, Boolean> performSeriesTest(byte[] src) {
+        int L = 2;
+        int n0 = 0; // 101
+        int n1 = 0; // 010
+        int n2 = 0; // 1001
+        int n3 = 0; // 0110
+        String bits = toBitString(src);
+
+        for (int i = 0; i < bits.length() - 2; i++) {
+            if (bits.charAt(i) == '0' && bits.charAt(i + 1) == '1' && bits.charAt(i + 2) == '0') {
+                n0++;
+            } else if ((bits.charAt(i) == '1' && bits.charAt(i + 1) == '0' && bits.charAt(i + 2) == '1')) {
+                n1++;
+            }
+        }
+        for (int i = 0; i < bits.length() - 3; i++) {
+            if (bits.charAt(i) == '0' && bits.charAt(i + 1) == '1' && bits.charAt(i + 2) == '1' && bits.charAt(i + 3) == '0') {
+                n2++;
+            } else if (bits.charAt(i) == '1' && bits.charAt(i + 1) == '0' && bits.charAt(i + 2) == '0' && bits.charAt(i + 3) == '1') {
+                n3++;
+            }
+        }
+
+        double f = pow(n0 - (bits.length() / pow(2, 3)), 2) / (bits.length() / pow(2, 3)) +
+                pow(n1 - (bits.length() / pow(2, 3)), 2) / (bits.length() / pow(2, 3)) +
+                pow(n2 - (bits.length() / pow(2, 4)), 2) / (bits.length() / pow(2, 4)) +
+                pow(n3 - (bits.length() / pow(2, 4)), 2) / (bits.length() / pow(2, 4));
+
+        final double Xi2 = 5.99; //Pe = 0.2, L = 2
+
+        if (f < Xi2) {
+            return new AbstractMap.SimpleEntry<>(f, true);
+        } else {
+            return new AbstractMap.SimpleEntry<>(f, false);
+        }
+    }
+
     public static byte[] rotateRight(byte[] src) {
         byte[] result = new byte[src.length];
 
@@ -30,41 +69,15 @@ public class CorrelationAnalyzer {
             for (int j = 0; j < 8; j++) {
                 int tmpIn = (inputByte >>> j) & 1;
                 int tmpOut = (outputByte >>> j) & 1;
-//                count += (2 * tmpIn - 1) * (2 * tmpOut - 1);
-                if (tmpIn == tmpOut) count++;
+                count += (2 * tmpIn - 1) * (2 * tmpOut - 1);
+//                if (tmpIn == tmpOut) count++;
             }
         }
         double N = size * 8;
 
-        return (count - (N - count)) / (N);
+//        return (count - (N - count)) / (N);
+        return count / N;
     }
-
-//    private int correlation(BigInteger first, BigInteger second, int N) {
-//        double result = 0;
-//        int count = 0;
-//        int count1 = 0;
-//        BigInteger test = BigInteger.valueOf(1);
-//
-//        for (int i = 0; i < N; i++) {
-//            if (first.testBit(i) == second.testBit(i)) count++;
-////            if(first.shiftRight(i).and(test).equals(second.shiftRight(i).and(test))) count1++;
-//        }
-//
-////        BitSet one = BitSet.valueOf(encryptedData);
-////        BitSet two = BitSet.valueOf(decryptedData);
-////
-////        for (int i = 0; i < one.length(); i++) {
-////            if (one.get(i) == two.get(i)) count1++;
-////        }
-//
-////        int dispCounter = (first.bitCount()) - count;
-////        cout << "Coincidence Counter: " << coincCounter << endl;
-////        System.out.println("Coincidence Counter: " + count);
-////        cout << "Discrepancy Counter: " << dispCounter << endl;
-////        System.out.println("Discrepancy Counter: " + dispCounter);
-////        System.out.println("TEST(: " + (double) count1 / one.length());
-//        return count;
-//    }
 
     public static double[] autoCorrelation(byte[] data) {
         int size = data.length;
@@ -75,8 +88,6 @@ public class CorrelationAnalyzer {
             corelTest[k] = countCorrelation(shifted, data);
             shifted = rotateRight(shifted);
         }
-
-        System.out.println(Arrays.toString(corelTest));
 
         return corelTest;
     }
@@ -121,5 +132,24 @@ public class CorrelationAnalyzer {
         }
 
         return result;
+    }
+
+    public static String toBitString(final byte[] b) {
+        final char[] bits = new char[8 * b.length];
+        for (int i = 0; i < b.length; i++) {
+            final byte byteval = b[i];
+            int bytei = i << 3;
+            int mask = 0x1;
+            for (int j = 7; j >= 0; j--) {
+                final int bitval = byteval & mask;
+                if (bitval == 0) {
+                    bits[bytei + j] = '0';
+                } else {
+                    bits[bytei + j] = '1';
+                }
+                mask <<= 1;
+            }
+        }
+        return String.valueOf(bits);
     }
 }

@@ -3,23 +3,29 @@ package main;
 import rc5.RC5;
 import rc5.SequenceEncrypter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.StringJoiner;
+import java.io.Serializable;
+import java.util.*;
 
 import static main.StringGenerator.generateString;
 
 public class Analyzer {
-    static void testAutoCorrelation(byte[] key, byte[] data, String filename) {
-        if (data.length > 16) {
-            throw new RuntimeException("data's too big for one block");
-        }
-        System.out.println("Generating autocorrelation dataset");
-        RC5 test = new RC5(key, 12);
+    static void performTests() {
+//        byte[] data = StringGenerator.generateString(16).getBytes();
+        byte[] data = "1234567890123456".getBytes();
+//        byte[] key = StringGenerator.generateString(64).getBytes();
+        byte[] key = "bneqozjogjiibtiejghrhqisepqfpzzlrrthskieofbkeweymqjdprjgozfeqbki".getBytes();
+//        byte[] data = FileEncrypter.readTxtBytes("dataset\\testData.txt");
+//        System.out.println(new String(data));
+        testAutoCorrelation(new byte[]{0x0, 0x0, 0x0, 0x0, 0x0}, data, "zeros.txt");
+        testAutoCorrelation(new byte[]{(byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF}, data, "ones.txt");
+        testAutoCorrelation(key, data, "random.txt");
+    }
 
-        byte[] decrypted = padBytes(data);
-        byte[] encrypted = test.encryptBlock(decrypted);
+    static void testAutoCorrelation(byte[] key, byte[] data, String filename) {
+        System.out.println("Generating autocorrelation dataset");
+        SequenceEncrypter test1 = new SequenceEncrypter(key, "");
+
+        byte[] encrypted = test1.encipherECB(data);
 
         double[] autoCorrelation = CorrelationAnalyzer.autoCorrelation(encrypted);
 
@@ -31,7 +37,13 @@ public class Analyzer {
         String frequencyResult = CorrelationAnalyzer.countOnes(encrypted) + " " +
                 CorrelationAnalyzer.countZeros(encrypted);
 
-        FileEncrypter.writeTxtBytes(frequencyResult.getBytes(), "freq"+filename);
+        AbstractMap.SimpleEntry<Double, Boolean> seriesResult = CorrelationAnalyzer.performSeriesTest(encrypted);
+        if (seriesResult.getValue()) {
+            System.out.println("f = " + seriesResult.getKey() + ", series test passed");
+        } else {
+            System.out.println("f = " + seriesResult.getKey() + ", series test failed");
+        }
+        FileEncrypter.writeTxtBytes(frequencyResult.getBytes(), "freq" + filename);
         FileEncrypter.writeTxtBytes(autoCorrelationResult.toString().getBytes(), filename);
     }
 
