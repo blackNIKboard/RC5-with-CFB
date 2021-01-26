@@ -80,7 +80,7 @@ public class RC5 {
 
             int[] iterationChanges = CorrelationAnalyzer.countChanges(src, concatenateParts(block));
             for (int j = 0; j < iterationChanges.length; j++) {
-                changes[j] += iterationChanges[i];
+                changes[j] += iterationChanges[j];
             }
         }
 

@@ -20,14 +20,22 @@ public class Analyzer {
         byte[] key = "bneqozjogjiibtiejghrhqisepqfpzzlrrthskieofbkeweymqjdprjgozfeqbki".getBytes();
 //        byte[] data = FileEncrypter.readTxtBytes("dataset\\testData.txt");
 //        System.out.println(new String(data));
-        byte[] zerosKey = new byte[]{0x0, 0x0, 0x0, 0x0, 0x0};
+        System.out.print("Performing tests for key: ");
+        byte[] zerosKey = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00};
+        System.out.println(CorrelationAnalyzer.toBitString(zerosKey));
+
         testAutoCorrelation(zerosKey, data, "zeros.txt");
         testChangesInBlocks(zerosKey, data, "changesZeros.txt");
 
-        byte[] onesKey = new byte[]{(byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF, (byte) 0xF};
+        System.out.print("Performing tests for key: ");
+        byte[] onesKey = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+        System.out.println(CorrelationAnalyzer.toBitString(onesKey));
+
         testAutoCorrelation(onesKey, data, "ones.txt");
         testChangesInBlocks(onesKey, data, "changesOnes.txt");
 
+        System.out.print("Performing tests for key: ");
+        System.out.println(CorrelationAnalyzer.toBitString(key));
         testAutoCorrelation(key, data, "random.txt");
         testChangesInBlocks(key, data, "changesRandom.txt");
     }
