@@ -17,9 +17,9 @@ public class CypherTester {
         String key = generateString(2, 255);
         String initVector = generateString(16);
 
-        String rawImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\Tux.bmp";
-        String encImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encECBTux.bmp";
-        String decImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decECBTux.bmp";
+        String rawImage = "image\\Tux.bmp";
+        String encImage = "image\\encECBTux.bmp";
+        String decImage = "image\\decECBTux.bmp";
         encryptFile(key, initVector, rawImage, encImage, debug, "ECB");
         decryptFile(key, initVector, encImage, decImage, debug, "ECB");
 
@@ -32,9 +32,9 @@ public class CypherTester {
         String key = generateString(2, 255);
         String initVector = generateString(16);
 
-        String rawImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\Tux.bmp";
-        String encImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encCFBTux.bmp";
-        String decImage = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decCFBTux.bmp";
+        String rawImage = "image\\Tux.bmp";
+        String encImage = "image\\encCFBTux.bmp";
+        String decImage = "image\\decCFBTux.bmp";
         encryptFile(key, initVector, rawImage, encImage, debug, "CFB");
         decryptFile(key, initVector, encImage, decImage, debug, "CFB");
 
@@ -46,9 +46,9 @@ public class CypherTester {
     static void testECBTxt() {
         String key = generateString(2, 255);
         String initVector = generateString(16);
-        String rawTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\number.txt";
-        String encTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encECBNumber.txt";
-        String decTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decECBNumber.txt";
+        String rawTxt = "image\\number.txt";
+        String encTxt = "image\\encECBNumber.txt";
+        String decTxt = "image\\decECBNumber.txt";
         encryptFile(key, initVector, rawTxt, encTxt, debug, "ECB");
         decryptFile(key, initVector, encTxt, decTxt, debug, "ECB");
 
@@ -60,9 +60,9 @@ public class CypherTester {
     static void testCFBTxt() {
         String key = generateString(2, 255);
         String initVector = generateString(16);
-        String rawTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\number.txt";
-        String encTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\encCFBNumber.txt";
-        String decTxt = "C:\\Users\\blackNIKboard\\IdeaProjects\\untitled\\src\\main\\image\\decCFBNumber.txt";
+        String rawTxt = "image\\number.txt";
+        String encTxt = "image\\encCFBNumber.txt";
+        String decTxt = "image\\decCFBNumber.txt";
         encryptFile(key, initVector, rawTxt, encTxt, debug, "CFB");
         decryptFile(key, initVector, encTxt, decTxt, debug, "CFB");
 

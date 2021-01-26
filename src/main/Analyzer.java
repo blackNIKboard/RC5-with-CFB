@@ -1,5 +1,6 @@
 package main;
 
+import rc5.RC5;
 import rc5.SequenceEncrypter;
 
 import java.util.ArrayList;
@@ -10,6 +11,30 @@ import java.util.StringJoiner;
 import static main.StringGenerator.generateString;
 
 public class Analyzer {
+    static void testAutoCorrelation(byte[] key, byte[] data, String filename) {
+        if (data.length > 16) {
+            throw new RuntimeException("data's too big for one block");
+        }
+        System.out.println("Generating autocorrelation dataset");
+        RC5 test = new RC5(key, 12);
+
+        byte[] decrypted = padBytes(data);
+        byte[] encrypted = test.encryptBlock(decrypted);
+
+        double[] autoCorrelation = CorrelationAnalyzer.autoCorrelation(encrypted);
+
+        StringBuilder autoCorrelationResult = new StringBuilder();
+        for (int i = 0; i < autoCorrelation.length; i++) {
+            autoCorrelationResult.append(i).append(" ").append(autoCorrelation[i]).append("\n");
+        }
+
+        String frequencyResult = CorrelationAnalyzer.countOnes(encrypted) + " " +
+                CorrelationAnalyzer.countZeros(encrypted);
+
+        FileEncrypter.writeTxtBytes(frequencyResult.getBytes(), "freq"+filename);
+        FileEncrypter.writeTxtBytes(autoCorrelationResult.toString().getBytes(), filename);
+    }
+
     static void testCorrelation() {
         System.out.println("Calculating correlation and bits");
         String initVector = generateString(16);
@@ -21,14 +46,9 @@ public class Analyzer {
         decrypted = padBytes(decrypted);
         byte[] encrypted = test.encipherCFB(decrypted);
 
-        CorrelationAnalyzer correlationAnalyzer = new CorrelationAnalyzer(decrypted, encrypted);
-        correlationAnalyzer.countOnes();
-        correlationAnalyzer.countZeros();
-        correlationAnalyzer.countCorrelation();
-
-        System.out.println("Number of ones: " + correlationAnalyzer.getOnes());
-        System.out.println("Number of zeros: " + correlationAnalyzer.getZeros());
-        System.out.println("Correlation: " + correlationAnalyzer.getCorrelation());
+        System.out.println("Number of ones: " + CorrelationAnalyzer.countOnes(encrypted));
+        System.out.println("Number of zeros: " + CorrelationAnalyzer.countZeros(encrypted));
+        System.out.println("Correlation: " + CorrelationAnalyzer.countCorrelation(decrypted, encrypted));
     }
 
     static void errorDistribution(int rounds) {
