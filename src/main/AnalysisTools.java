@@ -101,7 +101,7 @@ public class AnalysisTools {
         byte[] shifted = Arrays.copyOf(data, data.length);
 
         for (int k = 0; k <= size * 8; k++) {
-            System.out.println(toBitString(shifted));
+//            System.out.println(toBitString(shifted));
             corelTest[k] = countCorrelation(shifted, data);
             shifted = rotateRight(shifted);
         }
