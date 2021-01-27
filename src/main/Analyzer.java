@@ -71,8 +71,16 @@ public class Analyzer {
             autoCorrelationResult.append(i).append(" ").append(autoCorrelation[i]).append("\n");
         }
 
-        String frequencyResult = AnalysisTools.countOnes(encrypted) + " " +
-                AnalysisTools.countZeros(encrypted);
+        int ones = AnalysisTools.countOnes(encrypted);
+        int zeros = AnalysisTools.countZeros(encrypted);
+
+        String frequencyResult = ones + " " + zeros;
+
+        if ((double) ones / (ones + zeros) > 0.53 || (double) ones / (ones + zeros) < 0.47) {
+            System.out.println("Frequency test failed.");
+        } else {
+            System.out.println("Frequency test passed.");
+        }
 
         AbstractMap.SimpleEntry<Double, Boolean> seriesResult = AnalysisTools.performSeriesTest(encrypted);
         if (seriesResult.getValue()) {
